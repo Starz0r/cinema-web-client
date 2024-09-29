@@ -3,6 +3,11 @@
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useMutableStore, useConfigStore } from '@/utils/store';
+const semver = require("semver");
+
+interface ReleaseInfo {
+    stable: string
+}
 
 
 export default function Home() {
@@ -19,6 +24,8 @@ export default function Home() {
     const router = useRouter();
     const setServerUrl = useMutableStore((state) => state.setServer);
     const appConfig = useConfigStore((state) => state);
+
+    const [outdated, setAppOutdated] = useState(false);
 
     const loadConfig = useCallback(async () => {
 		if (!fs) { return; }
@@ -52,6 +59,18 @@ export default function Home() {
         })();
     }, [fs]);
 
+    useEffect(() => {
+        (async () => {
+            const resp = await fetch("https://raw.githubusercontent.com/Starz0r/cinema-desktop/refs/heads/master/.meta/.releases.json");
+            const releaseInfo: ReleaseInfo = JSON.parse(await resp.text());
+            if ((semver.valid(releaseInfo.stable)) && (semver.valid(process.env.NEXT_PUBLIC_APP_VERSION))) {
+                if (semver.gt(releaseInfo.stable, process.env.NEXT_PUBLIC_APP_VERSION)) {
+                    setAppOutdated(true);
+                }
+            }
+        })();
+    }, []);
+
     return (
         <main className="bg-zinc-600 flex min-h-screen min-w-[100vw] justify-center items-center text-white leading-6 box-border">
             <form onSubmit={connectToServer}>
@@ -66,6 +85,13 @@ export default function Home() {
                     </div>
                 </fieldset>
             </form>
+            {outdated ? (
+                <p className="absolute font-extrabold text-3xl text-amber-300 place-self-end">
+                    The application is outdated! Please install the latest version from{" "}
+                    <a href="https://github.com/Starz0r/cinema-desktop/releases">
+                        here!
+                    </a>
+                </p>) : (<></>)}
         </main>
     );
 }
