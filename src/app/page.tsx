@@ -11,16 +11,16 @@ interface ReleaseInfo {
 
 
 export default function Home() {
-	// HACK: such an egregious hack because of Tauri developers, and 
-	// their refusal to fix this outside of Tauri v2.
-	const [fs, setFsLib] = useState(null);
-	useEffect(() => {
-		(async () => {
-			const fsLib = (await import("@tauri-apps/api"))?.fs;
-			setFsLib(fsLib);
-		})();
-	}, []);
-	
+    // HACK: such an egregious hack because of Tauri developers, and 
+    // their refusal to fix this outside of Tauri v2.
+    const [fs, setFsLib] = useState(null);
+    useEffect(() => {
+        (async () => {
+            const fsLib = (await import("@tauri-apps/api"))?.fs;
+            setFsLib(fsLib);
+        })();
+    }, []);
+
     const router = useRouter();
     const setServerUrl = useMutableStore((state) => state.setServer);
     const appConfig = useConfigStore((state) => state);
@@ -28,7 +28,7 @@ export default function Home() {
     const [outdated, setAppOutdated] = useState(false);
 
     const loadConfig = useCallback(async () => {
-		if (!fs) { return; }
+        if (!fs) { return; }
         if (await fs.exists("config.json", { dir: fs.BaseDirectory.AppLocalData })) {
             const contents = await fs.readTextFile("config.json", { dir: fs.BaseDirectory.AppLocalData });
             appConfig.setConfig(JSON.parse(contents));
@@ -37,7 +37,7 @@ export default function Home() {
     }, [appConfig, fs]);
 
     const saveConfig = useCallback(async () => {
-		if (!fs) { return; }
+        if (!fs) { return; }
         await fs.writeTextFile("config.json", JSON.stringify(appConfig, undefined, 4), { dir: fs.BaseDirectory.AppLocalData });
     }, [appConfig, fs]);
 
